@@ -44,8 +44,6 @@ export const scedApi = {
     cte_pathway?: string;
     course_type?: string;
     grade_level?: string;
-    credit_hours_min?: number;
-    credit_hours_max?: number;
     sort_by?: string;
     sort_order?: 'asc' | 'desc';
     page?: number;

@@ -8,7 +8,7 @@ import {
   CheckCircleIcon,
   MapIcon,
   UserGroupIcon,
-  TrendingUpIcon,
+  ArrowTrendingUpIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
 import { ProgramMetricsData, ProgramTrend } from '@/types';
@@ -60,7 +60,7 @@ function MetricCard({ title, value, description, icon: Icon, color, bgColor, loa
                     trend.direction === 'up' ? 'text-green-600' : 
                     trend.direction === 'down' ? 'text-red-600' : 'text-gray-500'
                   }`}>
-                    <TrendingUpIcon 
+                    <ArrowTrendingUpIcon 
                       className={`self-center flex-shrink-0 h-4 w-4 ${
                         trend.direction === 'down' ? 'transform rotate-180' : ''
                       }`}
@@ -179,7 +179,7 @@ export default function ProgramMetrics({
       title: 'Avg Course Level',
       value: displayMetrics.avgCourseLevel.toFixed(1),
       description: 'Average course difficulty level',
-      icon: TrendingUpIcon,
+      icon: ArrowTrendingUpIcon,
       color: 'text-teal-600',
       bgColor: 'bg-teal-50',
     },

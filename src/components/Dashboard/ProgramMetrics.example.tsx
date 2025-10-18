@@ -9,11 +9,12 @@
 
 import { useEffect, useState } from 'react';
 import ProgramMetrics from './ProgramMetrics';
+import { ProgramMetricsData } from '@/types';
 
 // Example 1: Basic usage in Dashboard
 export function DashboardWithProgramMetrics() {
   const [isLoading, setIsLoading] = useState(true);
-  const [programData, setProgramData] = useState(null);
+  const [programData, setProgramData] = useState<ProgramMetricsData | null>(null);
 
   useEffect(() => {
     // Simulate data loading
@@ -49,7 +50,7 @@ export function DashboardWithProgramMetrics() {
       {/* Add ProgramMetrics component */}
       <ProgramMetrics
         programType="all"
-        metrics={programData}
+        metrics={programData || undefined}
         loading={isLoading}
         className="mt-6"
       />
@@ -75,7 +76,7 @@ export function CTEProgramMetrics() {
     <ProgramMetrics
       programType="cte"
       subjectArea="Business & Technology"
-      metrics={metrics}
+      metrics={metrics || undefined}
       loading={false}
     />
   );
@@ -84,7 +85,7 @@ export function CTEProgramMetrics() {
 // Example 3: Subject-specific metrics
 export function SubjectAreaMetrics({ subjectArea }: { subjectArea: string }) {
   const [loading, setLoading] = useState(true);
-  const [metrics, setMetrics] = useState(null);
+  const [metrics, setMetrics] = useState<ProgramMetricsData | null>(null);
 
   useEffect(() => {
     const fetchSubjectMetrics = async () => {
@@ -122,7 +123,7 @@ export function SubjectAreaMetrics({ subjectArea }: { subjectArea: string }) {
     <ProgramMetrics
       programType="cte"
       subjectArea={subjectArea}
-      metrics={metrics}
+      metrics={metrics || undefined}
       loading={loading}
     />
   );
@@ -157,7 +158,7 @@ export async function fetchProgramMetrics(filters?: {
     console.error('Error fetching program metrics:', error);
     return {
       success: false,
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -171,7 +172,7 @@ export function EnhancedDashboardPage() {
       totalSearches: 0,
       favoriteCount: 0,
     },
-    programMetrics: null,
+    programMetrics: undefined,
     recentSearches: [],
     popularCourses: [],
   });

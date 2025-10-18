@@ -98,20 +98,15 @@ export default function PopularCourses({ courses, loading }: PopularCoursesProps
                       </p>
                     )}
                     <div className="flex items-center space-x-4 mt-2">
-                      {course.credit_hours && (
-                        <span className="text-xs text-gray-500">
-                          {course.credit_hours} credits
-                        </span>
-                      )}
-                      {course.grade_level_low && course.grade_level_high && (
+                      {course.course_level && (
                         <span className="flex items-center text-xs text-gray-500">
                           <AcademicCapIcon className="h-3 w-3 mr-1" />
-                          Grades {course.grade_level_low}-{course.grade_level_high}
+                          {course.course_level}
                         </span>
                       )}
-                      {course.course_type && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-secondary-100 text-secondary-800">
-                          {course.course_type}
+                      {course.cte_indicator === 'Yes' && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                          CTE
                         </span>
                       )}
                     </div>
