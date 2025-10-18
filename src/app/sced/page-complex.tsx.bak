@@ -1,0 +1,391 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import SearchBar from '@/components/Search/SearchBar';
+import FilterPanel from '@/components/Search/FilterPanel';
+import CourseCard from '@/components/Shared/CourseCard';
+import Pagination from '@/components/Shared/Pagination';
+import { scedApi, userApi } from '@/lib/api-services';
+import { useAuth } from '@/contexts/AuthContext';
+import { SCEDCourse } from '@/types';
+import { 
+  BookOpenIcon,
+  ViewColumnsIcon,
+  Bars3Icon,
+  AdjustmentsHorizontalIcon,
+  XMarkIcon,
+  FunnelIcon
+} from '@heroicons/react/24/outline';
+
+type ViewMode = 'grid' | 'list';
+type SortOption = 'name' | 'code' | 'recent' | 'credits';
+
+export default function SCEDCoursesPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { user } = useAuth();
+
+  const [courses, setCourses] = useState<SCEDCourse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [sortBy, setSortBy] = useState<SortOption>('name');
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({});
+  const [searchQuery, setSearchQuery] = useState('');
+  const [userFavorites, setUserFavorites] = useState<string[]>([]);
+
+  const itemsPerPage = 12;
+
+  // Initialize from URL params
+  useEffect(() => {
+    const pageFromUrl = parseInt(searchParams.get('page') || '1');
+    const queryFromUrl = searchParams.get('q') || '';
+    const sortFromUrl = searchParams.get('sort') as SortOption || 'name';
+
+    setCurrentPage(pageFromUrl);
+    setSearchQuery(queryFromUrl);
+    setSortBy(sortFromUrl);
+  }, [searchParams]);
+
+  // Load courses
+  useEffect(() => {
+    loadCourses();
+  }, [currentPage, sortBy, filters, searchQuery]);
+
+  // Load user favorites
+  useEffect(() => {
+    const loadUserFavorites = async () => {
+      if (!user) return;
+      
+      try {
+        const favoritesResponse = await userApi.getFavorites();
+        const courseIds = favoritesResponse.data
+          .filter(f => f.favorite_type === 'sced_course')
+          .map(f => f.item_id);
+        setUserFavorites(courseIds);
+      } catch (error) {
+        console.error('Failed to load user favorites:', error);
+      }
+    };
+
+    loadUserFavorites();
+  }, [user]);
+
+  const loadCourses = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Filter out certification-specific parameters that SCED API doesn't accept
+      const { certification_type, issuing_authority, ...scedFilters } = filters;
+      
+      const response = await scedApi.searchCourses({
+        query: searchQuery,
+        ...scedFilters, // Only include SCED-relevant filters
+        page: currentPage,
+        limit: itemsPerPage,
+        sortBy,
+        sortOrder: 'asc'
+      });
+
+      setCourses(response.data);
+      setTotalItems(response.pagination.total);
+      setTotalPages(response.pagination.totalPages);
+    } catch (err: any) {
+      console.error('Failed to load courses:', err);
+      setError(err.response?.data?.error?.message || 'Failed to load courses. Please try again.');
+      setCourses([]);
+      setTotalItems(0);
+      setTotalPages(1);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1);
+    updateUrlParams({ q: query, page: '1' });
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    updateUrlParams({ page: page.toString() });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSortChange = (sort: SortOption) => {
+    setSortBy(sort);
+    setCurrentPage(1);
+    updateUrlParams({ sort, page: '1' });
+  };
+
+  const handleFilterChange = useCallback((newFilters: any) => {
+    setFilters(newFilters);
+    setCurrentPage(1);
+    updateUrlParams({ page: '1' });
+  }, [searchParams, router]);
+
+  const updateUrlParams = (updates: Record<string, string>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value) {
+        params.set(key, value);
+      } else {
+        params.delete(key);
+      }
+    });
+
+    router.push(`/sced?${params.toString()}`);
+  };
+
+  const handleCourseToggleFavorite = async (courseId: string, isFavorite: boolean) => {
+    if (isFavorite) {
+      setUserFavorites(prev => [...prev, courseId]);
+    } else {
+      setUserFavorites(prev => prev.filter(id => id !== courseId));
+    }
+  };
+
+  const getActiveFiltersCount = () => {
+    return Object.values(filters).filter(value => 
+      Array.isArray(value) ? value.length > 0 : Boolean(value)
+    ).length;
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 flex items-center">
+                <BookOpenIcon className="h-8 w-8 text-primary-600 mr-3" />
+                SCED Courses
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Browse and search the complete catalog of SCED course codes
+              </p>
+            </div>
+          </div>
+
+          {/* Search Bar */}
+          <div className="max-w-2xl">
+            <SearchBar
+              onSearch={handleSearch}
+              placeholder="Search course titles, SCED codes, subject areas..."
+              showTypeToggle={false}
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Filters Sidebar */}
+          <aside className={`lg:w-80 ${showFilters ? 'block' : 'hidden lg:block'}`}>
+            <div className="sticky top-8">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div className="p-4 border-b border-gray-200 lg:hidden">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-medium text-gray-900 flex items-center">
+                      <FunnelIcon className="h-5 w-5 mr-2" />
+                      Filters
+                      {getActiveFiltersCount() > 0 && (
+                        <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+                          {getActiveFiltersCount()}
+                        </span>
+                      )}
+                    </h3>
+                    <button
+                      onClick={() => setShowFilters(false)}
+                      className="p-1 text-gray-400 hover:text-gray-500"
+                    >
+                      <XMarkIcon className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+                <FilterPanel
+                  onFiltersChange={handleFilterChange}
+                  className="border-none shadow-none"
+                />
+              </div>
+            </div>
+          </aside>
+
+          {/* Main Content */}
+          <main className="flex-1 min-w-0">
+            {/* Controls Bar */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
+              <div className="flex items-center space-x-4">
+                {/* Mobile Filter Toggle */}
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="lg:hidden inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  <AdjustmentsHorizontalIcon className="h-4 w-4 mr-2" />
+                  Filters
+                  {getActiveFiltersCount() > 0 && (
+                    <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+                      {getActiveFiltersCount()}
+                    </span>
+                  )}
+                </button>
+
+                {/* Results Count */}
+                <div className="text-sm text-gray-500">
+                  {loading ? (
+                    <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                  ) : (
+                    <span>
+                      Showing {(totalItems || 0).toLocaleString()} course{(totalItems || 0) !== 1 ? 's' : ''}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-4">
+                {/* Sort Dropdown */}
+                <select
+                  value={sortBy}
+                  onChange={(e) => handleSortChange(e.target.value as SortOption)}
+                  className="rounded-md border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500"
+                  disabled={loading}
+                >
+                  <option value="name">Sort by Name</option>
+                  <option value="code">Sort by SCED Code</option>
+                  <option value="credits">Sort by Credits</option>
+                  <option value="recent">Sort by Recently Added</option>
+                </select>
+
+                {/* View Toggle */}
+                <div className="flex rounded-md border border-gray-300">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`p-2 text-sm font-medium rounded-l-md ${
+                      viewMode === 'grid'
+                        ? 'bg-primary-50 text-primary-600 border-primary-300'
+                        : 'bg-white text-gray-500 hover:text-gray-700'
+                    }`}
+                    disabled={loading}
+                  >
+                    <ViewColumnsIcon className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`p-2 text-sm font-medium rounded-r-md border-l ${
+                      viewMode === 'list'
+                        ? 'bg-primary-50 text-primary-600 border-primary-300'
+                        : 'bg-white text-gray-500 hover:text-gray-700'
+                    }`}
+                    disabled={loading}
+                  >
+                    <Bars3Icon className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="mb-6 rounded-md bg-red-50 p-4">
+                <div className="text-sm text-red-700">{error}</div>
+              </div>
+            )}
+
+            {/* Loading State */}
+            {loading && (
+              <div className={viewMode === 'grid' 
+                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" 
+                : "space-y-4"
+              }>
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                    <div className="animate-pulse">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center space-x-2">
+                          <div className="h-9 w-9 bg-gray-200 rounded-md"></div>
+                          <div className="h-4 bg-gray-200 rounded w-16"></div>
+                        </div>
+                      </div>
+                      <div className="h-6 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-4 bg-gray-200 rounded mb-3"></div>
+                      <div className="space-y-2">
+                        <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Empty State */}
+            {!loading && courses.length === 0 && (
+              <div className="text-center py-12">
+                <BookOpenIcon className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No courses found</h3>
+                <p className="text-gray-500 mb-6">
+                  {searchQuery || getActiveFiltersCount() > 0 ? (
+                    'Try adjusting your search terms or filters'
+                  ) : (
+                    'No SCED courses are available at this time'
+                  )}
+                </p>
+                {(searchQuery || getActiveFiltersCount() > 0) && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery('');
+                      setFilters({});
+                      setCurrentPage(1);
+                      updateUrlParams({ q: '', page: '1' });
+                    }}
+                    className="text-primary-600 hover:text-primary-500 font-medium"
+                  >
+                    Clear all filters
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Courses Grid/List */}
+            {!loading && courses.length > 0 && (
+              <>
+                <div className={viewMode === 'grid' 
+                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8" 
+                  : "space-y-4 mb-8"
+                }>
+                  {courses.map((course) => (
+                    <CourseCard
+                      key={course.id}
+                      course={course}
+                      isFavorite={userFavorites.includes(course.id)}
+                      onFavoriteToggle={handleCourseToggleFavorite}
+                      className={viewMode === 'list' ? 'w-full' : ''}
+                    />
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalItems={totalItems}
+                    itemsPerPage={itemsPerPage}
+                    onPageChange={handlePageChange}
+                  />
+                )}
+              </>
+            )}
+          </main>
+        </div>
+      </div>
+    </div>
+  );
+}
