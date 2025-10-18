@@ -83,21 +83,21 @@ export default function FilterPanel({ onFiltersChange, className = '' }: FilterP
       {
         id: 'cte_pathways',
         name: 'CTE Pathways',
-        options: filterOptions.cte_pathways || [],
+        options: filterOptions.cte_indicators || [],
         current: filters.cte_pathway,
         onChange: (value: string) => handleFilterChange('cte_pathway', value),
       },
       {
         id: 'course_types',
         name: 'Course Types',
-        options: filterOptions.course_types || [],
+        options: filterOptions.course_levels || [],
         current: filters.course_type,
         onChange: (value: string) => handleFilterChange('course_type', value),
       },
       {
         id: 'grade_levels',
         name: 'Grade Levels',
-        options: filterOptions.grade_levels || [],
+        options: filterOptions.course_levels || [],
         current: filters.grade_level,
         onChange: (value: string) => handleFilterChange('grade_level', value),
       },
@@ -188,7 +188,7 @@ export default function FilterPanel({ onFiltersChange, className = '' }: FilterP
                           className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
                         />
                         <span className="ml-2 text-sm text-gray-700 flex-1">
-                          {'label' in option ? option.label : option.value}
+                          {(option as any).label || (option as any).value}
                         </span>
                         {'count' in option && option.count && (
                           <span className="text-xs text-gray-500 ml-1">

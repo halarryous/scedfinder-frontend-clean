@@ -60,7 +60,7 @@ export interface SCEDCertificationRequirement {
 }
 
 // Extended types with relationships
-export interface SCEDCourseWithCertifications extends SCEDCourse {
+export interface SCEDCourseWithCertifications extends Omit<SCEDCourse, 'certifications'> {
   certifications?: Array<Certification & { 
     requirement_type: string; 
     notes?: string;
