@@ -79,6 +79,13 @@ export interface SearchSuggestion {
   count?: number;
 }
 
+export interface SearchHistory {
+  id: string;
+  query: string;
+  timestamp: string;
+  results_count?: number;
+}
+
 // Request/Response types
 
 export interface SearchRequest {
