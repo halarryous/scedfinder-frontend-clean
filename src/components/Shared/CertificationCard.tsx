@@ -3,8 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Certification } from '@/types';
-import { useAuth } from '@/contexts/AuthContext';
-import { userApi } from '@/lib/api-services';
 import { 
   AcademicCapIcon,
   HeartIcon,
@@ -14,7 +12,6 @@ import {
   TagIcon,
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
-import toast from 'react-hot-toast';
 
 interface CertificationCardProps {
   certification: Certification;
@@ -31,41 +28,13 @@ export default function CertificationCard({
   onFavoriteToggle,
   className = '' 
 }: CertificationCardProps) {
-  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [favoriteState, setFavoriteState] = useState(isFavorite);
 
   const handleFavoriteToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    if (!user) {
-      toast.error('Please login to save favorites');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      if (favoriteState) {
-        // Remove from favorites - this would need the favorite ID
-        toast.success('Removed from favorites');
-        setFavoriteState(false);
-        onFavoriteToggle?.(certification.id, false);
-      } else {
-        await userApi.addToFavorites({
-          favorite_type: 'certification',
-          item_id: certification.id,
-        });
-        toast.success('Added to favorites');
-        setFavoriteState(true);
-        onFavoriteToggle?.(certification.id, true);
-      }
-    } catch (error: any) {
-      const message = error.response?.data?.error?.message || 'Failed to update favorites';
-      toast.error(message);
-    } finally {
-      setIsLoading(false);
-    }
+    // Favorites feature removed - no auth system
   };
 
   const getCertificationTypeColor = (type?: string) => {
@@ -99,7 +68,7 @@ export default function CertificationCard({
             </div>
           </div>
           
-          {showFavoriteButton && user && (
+          {false && (
             <button
               onClick={handleFavoriteToggle}
               disabled={isLoading}

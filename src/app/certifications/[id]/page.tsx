@@ -3,11 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { certificationApi, userApi } from '@/lib/api-services';
-import { useAuth } from '@/contexts/AuthContext';
 import { Certification, SCEDCourse } from '@/types';
 import CourseCard from '@/components/Shared/CourseCard';
-import toast from 'react-hot-toast';
 import { 
   AcademicCapIcon,
   HeartIcon,
@@ -31,7 +28,6 @@ interface CertificationDetailPageProps {
 
 export default function CertificationDetailPage({ params }: CertificationDetailPageProps) {
   const router = useRouter();
-  const { user } = useAuth();
   const [certification, setCertification] = useState<Certification | null>(null);
   const [qualifiedCourses, setQualifiedCourses] = useState<{
     required: SCEDCourse[];
@@ -46,91 +42,22 @@ export default function CertificationDetailPage({ params }: CertificationDetailP
 
   useEffect(() => {
     loadCertificationDetails();
-    if (user) {
-      checkIfFavorite();
-    }
-  }, [params.id, user]);
+  }, [params.id]);
 
   const loadCertificationDetails = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Load certification details
-      const certResponse = await certificationApi.getCertificationById(params.id);
-      setCertification(certResponse.data.certification);
-
-      // Load qualified courses
-      setCoursesLoading(true);
-      const coursesResponse = await certificationApi.getCertificationCourses(params.id);
-      setQualifiedCourses(coursesResponse.data);
-
-    } catch (err: any) {
-      console.error('Failed to load certification details:', err);
-      setError(err.response?.data?.error?.message || 'Failed to load certification details');
-    } finally {
-      setLoading(false);
-      setCoursesLoading(false);
-    }
+    // This page is not implemented in the simplified version
+    setError('Certification details page is not available');
+    setLoading(false);
+    setCoursesLoading(false);
   };
 
-  const checkIfFavorite = async () => {
-    try {
-      const favoritesResponse = await userApi.getFavorites();
-      const isFav = favoritesResponse.data.some(f => 
-        f.favorite_type === 'certification' && f.item_id === params.id
-      );
-      setIsFavorite(isFav);
-    } catch (error) {
-      console.error('Failed to check favorite status:', error);
-    }
-  };
 
   const handleToggleFavorite = async () => {
-    if (!user) {
-      toast.error('Please login to save favorites');
-      return;
-    }
-
-    setFavLoading(true);
-    try {
-      if (isFavorite) {
-        // Remove from favorites (would need favorite ID in real implementation)
-        setIsFavorite(false);
-        toast.success('Removed from favorites');
-      } else {
-        await userApi.addToFavorites({
-          favorite_type: 'certification',
-          item_id: params.id,
-        });
-        setIsFavorite(true);
-        toast.success('Added to favorites');
-      }
-    } catch (error: any) {
-      const message = error.response?.data?.error?.message || 'Failed to update favorites';
-      toast.error(message);
-    } finally {
-      setFavLoading(false);
-    }
+    // Favorites feature removed - no auth system
   };
 
   const handleShare = async () => {
-    if (navigator.share && certification) {
-      try {
-        await navigator.share({
-          title: certification.certification_name,
-          text: `Check out this certification: ${certification.certification_name} (${certification.certification_code})`,
-          url: window.location.href,
-        });
-      } catch (error) {
-        // Fallback to copying URL
-        navigator.clipboard.writeText(window.location.href);
-        toast.success('Certification URL copied to clipboard');
-      }
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      toast.success('Certification URL copied to clipboard');
-    }
+    // Share feature removed
   };
 
   const handlePrint = () => {
@@ -307,20 +234,6 @@ export default function CertificationDetailPage({ params }: CertificationDetailP
                   Print
                 </button>
 
-                {user && (
-                  <button
-                    onClick={handleToggleFavorite}
-                    disabled={favLoading}
-                    className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                  >
-                    {isFavorite ? (
-                      <HeartIconSolid className="h-4 w-4 mr-2 text-red-500" />
-                    ) : (
-                      <HeartIcon className="h-4 w-4 mr-2" />
-                    )}
-                    {isFavorite ? 'Favorited' : 'Add to Favorites'}
-                  </button>
-                )}
               </div>
             </div>
           </div>

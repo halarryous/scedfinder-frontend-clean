@@ -78,7 +78,7 @@ export default function SimpleCertificationsBrowse() {
           <div className="flex items-center justify-between">
             <div>
               <Link href="/" className="text-blue-600 hover:text-blue-700 text-sm mb-2 inline-block">
-                ← Back to Dashboard
+                ← Back to Home
               </Link>
               <h1 className="text-2xl font-bold text-gray-900">Teacher Certifications</h1>
               <p className="text-sm text-gray-600 mt-1">
