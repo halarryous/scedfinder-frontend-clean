@@ -43,7 +43,7 @@ export default function SimpleCertificationsBrowse() {
 
       if (data.success) {
         setCertifications(data.data);
-        setTotalItems(data.pagination.total);
+        setTotalItems(data.total);
       }
     } catch (error) {
       console.error('Failed to load certifications:', error);
