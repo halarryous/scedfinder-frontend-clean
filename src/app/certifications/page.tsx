@@ -20,10 +20,12 @@ export default function SimpleCertificationsBrowse() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [pageInput, setPageInput] = useState('1');
   const itemsPerPage = 20;
 
   useEffect(() => {
     loadCertifications();
+    setPageInput(currentPage.toString());
   }, [currentPage]);
 
   const loadCertifications = async () => {
@@ -46,6 +48,25 @@ export default function SimpleCertificationsBrowse() {
       console.error('Failed to load certifications:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePageJump = () => {
+    const page = parseInt(pageInput);
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    } else {
+      setPageInput(currentPage.toString());
+    }
+  };
+
+  const handlePageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPageInput(e.target.value);
+  };
+
+  const handlePageInputKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handlePageJump();
     }
   };
 
@@ -165,7 +186,7 @@ export default function SimpleCertificationsBrowse() {
                 <div className="text-sm text-gray-700">
                   Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} certifications
                 </div>
-                <div className="flex space-x-2">
+                <div className="flex items-center space-x-2">
                   <button
                     onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
@@ -173,9 +194,28 @@ export default function SimpleCertificationsBrowse() {
                   >
                     Previous
                   </button>
-                  <span className="px-4 py-2 text-sm text-gray-700">
-                    Page {currentPage} of {totalPages}
-                  </span>
+                  
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-gray-700">Page</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max={totalPages}
+                      value={pageInput}
+                      onChange={handlePageInputChange}
+                      onKeyPress={handlePageInputKeyPress}
+                      onBlur={handlePageJump}
+                      className="w-16 px-2 py-1 border border-gray-300 rounded text-sm text-center"
+                    />
+                    <span className="text-sm text-gray-700">of {totalPages}</span>
+                    <button
+                      onClick={handlePageJump}
+                      className="px-2 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                    >
+                      Go
+                    </button>
+                  </div>
+                  
                   <button
                     onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
