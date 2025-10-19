@@ -64,8 +64,8 @@ export default function SimpleCourseDetail({ params }: CourseDetailPageProps) {
       
       const data = await response.json();
 
-      if (data.success && data.data.course) {
-        setCourse(data.data.course);
+      if (data.success && data.data) {
+        setCourse(data.data);
       } else {
         setError(data.error?.message || 'Course not found');
       }

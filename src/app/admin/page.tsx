@@ -35,7 +35,7 @@ export default function AdminPage() {
 
   const loadDatabaseStats = async () => {
     try {
-      const response = await axios.get('${API_BASE_URL}/admin/stats');
+      const response = await axios.get(`${API_BASE_URL}/admin/stats`);
       setDbStats(response.data.data);
     } catch (error) {
       console.error('Failed to load database stats:', error);
@@ -89,7 +89,7 @@ export default function AdminPage() {
         formData.append('type', uploadType);
 
         const response = await axios.post(
-          '${API_BASE_URL}/admin/upload-csv',
+          `${API_BASE_URL}/admin/upload-csv`,
           formData,
           {
             headers: {
