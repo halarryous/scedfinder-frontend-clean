@@ -10,9 +10,9 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/auth', request.url));
   }
   
-  // If authenticated and on auth page, redirect to dashboard
+  // If authenticated and on auth page, redirect to main page
   if (authenticated && isAuthPage) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    return NextResponse.redirect(new URL('/', request.url));
   }
   
   return NextResponse.next();
