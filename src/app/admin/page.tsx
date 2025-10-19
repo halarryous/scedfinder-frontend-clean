@@ -12,6 +12,7 @@ import {
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import { API_BASE_URL } from '@/lib/api';
 
 interface UploadStatus {
   file: string;
@@ -34,7 +35,7 @@ export default function AdminPage() {
 
   const loadDatabaseStats = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/api/v1/admin/stats');
+      const response = await axios.get('${API_BASE_URL}/admin/stats');
       setDbStats(response.data.data);
     } catch (error) {
       console.error('Failed to load database stats:', error);
@@ -88,7 +89,7 @@ export default function AdminPage() {
         formData.append('type', uploadType);
 
         const response = await axios.post(
-          'http://localhost:4000/api/v1/admin/upload-csv',
+          '${API_BASE_URL}/admin/upload-csv',
           formData,
           {
             headers: {

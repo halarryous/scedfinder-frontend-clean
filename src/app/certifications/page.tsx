@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { 
   AcademicCapIcon
 } from '@heroicons/react/24/outline';
+import { API_BASE_URL } from '@/lib/api';
 
 interface Certification {
   name: string;
@@ -37,7 +38,7 @@ export default function SimpleCertificationsBrowse() {
         sort_order: 'asc'
       });
 
-      const response = await fetch(`http://localhost:4000/api/v1/certifications/search?${params}`);
+      const response = await fetch(`${API_BASE_URL}/certifications/search?${params}`);
       const data = await response.json();
 
       if (data.success) {

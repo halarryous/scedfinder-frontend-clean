@@ -10,6 +10,7 @@ import {
   ExclamationTriangleIcon,
   ArrowLeftIcon
 } from '@heroicons/react/24/outline';
+import { API_BASE_URL } from '@/lib/api';
 
 interface CourseDetailPageProps {
   params: { id: string };
@@ -47,8 +48,8 @@ export default function SimpleCourseDetail({ params }: CourseDetailPageProps) {
       // Check if the ID is a UUID (contains hyphens) or a course code (numeric)
       const isUUID = params.id.includes('-');
       const apiEndpoint = isUUID 
-        ? `http://localhost:4000/api/v1/sced/courses/${params.id}`
-        : `http://localhost:4000/api/v1/sced/courses/code/${params.id}`;
+        ? `${API_BASE_URL}/sced/courses/${params.id}`
+        : `${API_BASE_URL}/sced/courses/code/${params.id}`;
       
       const response = await fetch(apiEndpoint, {
         method: 'GET',

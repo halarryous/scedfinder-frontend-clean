@@ -9,6 +9,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon
 } from '@heroicons/react/24/outline';
+import { API_BASE_URL } from '@/lib/api';
 
 interface SCEDCourse {
   id: string;
@@ -46,7 +47,7 @@ export default function SimpleSCEDBrowse() {
         sort_order: 'asc'
       });
 
-      const response = await fetch(`http://localhost:4000/api/v1/sced/search?${params}`);
+      const response = await fetch(`${API_BASE_URL}/sced/search?${params}`);
       const data = await response.json();
 
       if (data.success) {

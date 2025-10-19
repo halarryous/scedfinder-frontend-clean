@@ -9,6 +9,7 @@ import {
   ChevronRightIcon,
   BookOpenIcon
 } from '@heroicons/react/24/outline';
+import { API_BASE_URL } from '@/lib/api';
 
 interface CTECourse {
   id: string;
@@ -46,7 +47,7 @@ export default function CTECoursesPage() {
       });
 
       const response = await fetch(
-        `http://localhost:4000/api/v1/certifications/name/${encodeURIComponent(certificationName)}/cte-courses?${params}`
+        `${API_BASE_URL}/certifications/name/${encodeURIComponent(certificationName)}/cte-courses?${params}`
       );
       const data = await response.json();
 
