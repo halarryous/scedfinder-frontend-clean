@@ -130,15 +130,15 @@ export default function AutoComplete({
                   </div>
                   <div className="flex-1">
                     <div className="text-sm text-gray-900">
-                      {highlightMatch(search.search_query, query)}
+                      {highlightMatch(search.query, query)}
                     </div>
                     <div className="text-xs text-gray-500">
-                      {new Date(search.searched_at).toLocaleDateString()} • 
+                      {new Date(search.timestamp).toLocaleDateString()} • 
                       {search.results_count || 0} results
                     </div>
                   </div>
                   <div className="text-xs text-gray-400 capitalize">
-                    {search.search_type || 'all'}
+                    search
                   </div>
                 </button>
               ))}
