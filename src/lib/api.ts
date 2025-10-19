@@ -5,8 +5,15 @@ class ApiClient {
   private client: AxiosInstance;
 
   constructor() {
+    const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+    console.log('API Client initialized with baseURL:', baseURL);
+    console.log('Environment variables:', {
+      NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+      NODE_ENV: process.env.NODE_ENV
+    });
+    
     this.client = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1',
+      baseURL: baseURL,
       headers: {
         'Content-Type': 'application/json',
       },
