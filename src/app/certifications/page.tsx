@@ -17,25 +17,21 @@ interface Certification {
 export default function SimpleCertificationsBrowse() {
   const [certifications, setCertifications] = useState<Certification[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedLetter, setSelectedLetter] = useState<string>('A');
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-
-  // Create alphabet array
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 20;
 
   useEffect(() => {
     loadCertifications();
-  }, [selectedLetter]);
+  }, [currentPage]);
 
   const loadCertifications = async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
-        query: `${selectedLetter}*`, // Use wildcard search for letter
-        page: '1',
-        limit: '100', // Maximum allowed by validation
-        sort_by: 'certification_name',
-        sort_order: 'asc'
+        page: currentPage.toString(),
+        limit: itemsPerPage.toString()
       });
 
       const response = await fetch(`${API_BASE_URL}/certifications/search?${params}`);
@@ -44,16 +40,13 @@ export default function SimpleCertificationsBrowse() {
       if (data.success) {
         setCertifications(data.data);
         setTotalItems(data.total);
+        setTotalPages(Math.ceil(data.total / itemsPerPage));
       }
     } catch (error) {
       console.error('Failed to load certifications:', error);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleLetterClick = (letter: string) => {
-    setSelectedLetter(letter);
   };
 
   return (
@@ -75,28 +68,13 @@ export default function SimpleCertificationsBrowse() {
         </div>
       </div>
 
-      {/* Alphabetical Navigation */}
+      {/* Page Info */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-wrap justify-center gap-2">
-            {alphabet.map((letter) => (
-              <button
-                key={letter}
-                onClick={() => handleLetterClick(letter)}
-                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                  selectedLetter === letter
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {letter}
-              </button>
-            ))}
-          </div>
-          <div className="text-center mt-3">
+          <div className="text-center">
             <p className="text-sm text-gray-600">
-              Showing certifications starting with <span className="font-medium">{selectedLetter}</span>
-              {totalItems > 0 && ` (${totalItems} ${totalItems === 1 ? 'certification' : 'certifications'})`}
+              Showing page {currentPage} of {totalPages}
+              {totalItems > 0 && ` (${totalItems} total CTE certifications)`}
             </p>
           </div>
         </div>
@@ -181,12 +159,31 @@ export default function SimpleCertificationsBrowse() {
               </table>
             </div>
 
-            {/* Results Summary */}
-            {totalItems > 0 && (
-              <div className="mt-6 text-center">
-                <p className="text-sm text-gray-600">
-                  Found {totalItems} certification{totalItems !== 1 ? 's' : ''} starting with "{selectedLetter}"
-                </p>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-6 flex items-center justify-between">
+                <div className="text-sm text-gray-700">
+                  Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} certifications
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  <span className="px-4 py-2 text-sm text-gray-700">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
             )}
           </>
