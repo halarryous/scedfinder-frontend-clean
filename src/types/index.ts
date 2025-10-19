@@ -1,15 +1,4 @@
-// User types
-export interface User {
-  id: string;
-  username: string;
-  email: string;
-  role: 'admin' | 'user' | 'readonly';
-  preferences?: Record<string, any>;
-  is_active: boolean;
-  last_login?: string;
-  created_at: string;
-  updated_at: string;
-}
+// Core application types
 
 // SCED Course types - Updated to match API response structure
 export interface SCEDCourse {
@@ -83,26 +72,6 @@ export interface SearchResult {
   limit?: number;
 }
 
-export interface SearchHistory {
-  id: string;
-  user_id?: string;
-  search_type?: 'sced' | 'certification' | 'both' | 'verification' | 'universal';
-  search_query: string;
-  search_filters?: Record<string, any>;
-  results_count?: number;
-  selected_result_id?: string;
-  searched_at: string;
-}
-
-export interface UserFavorite {
-  id: string;
-  user_id: string;
-  favorite_type: 'sced_course' | 'certification';
-  item_id: string;
-  notes?: string;
-  created_at: string;
-  item_data?: SCEDCourse | Certification;
-}
 
 export interface SearchSuggestion {
   text: string;
@@ -111,17 +80,6 @@ export interface SearchSuggestion {
 }
 
 // Request/Response types
-export interface LoginRequest {
-  username: string;
-  password: string;
-}
-
-export interface RegisterRequest {
-  username: string;
-  email: string;
-  password: string;
-  role?: 'admin' | 'user' | 'readonly';
-}
 
 export interface SearchRequest {
   query?: string;
@@ -169,13 +127,6 @@ export interface ApiError {
   };
 }
 
-export interface AuthResponse {
-  success: boolean;
-  data: {
-    user: User;
-    token: string;
-  };
-}
 
 export interface UniversalSearchResponse {
   sced_courses?: SCEDCourse[];
@@ -186,47 +137,3 @@ export interface UniversalSearchResponse {
   suggestions?: SearchSuggestion[];
 }
 
-export interface SearchAnalytics {
-  total_searches: number;
-  unique_users: number;
-  top_queries: Array<{ query: string; count: number }>;
-  search_trends: Array<{ date: string; count: number }>;
-  popular_results: Array<{ result_id: string; selections: number }>;
-}
-
-export interface FilterOptions {
-  subject_areas?: Array<{ value: string; count: number }>;
-  cte_indicators?: Array<{ value: string; count: number }>;
-  course_levels?: Array<{ value: string; count: number }>;
-  ap_indicators?: Array<{ value: string; count: number }>;
-  ib_indicators?: Array<{ value: string; count: number }>;
-  certification_types?: Array<{ value: string; count: number }>;
-  issuing_authorities?: Array<{ value: string; count: number }>;
-}
-
-// Program Metrics types for ProgramMetrics component
-export interface ProgramMetricsData {
-  totalCourses: number;
-  cteCourses: number;
-  requiredCertifications: number;
-  optionalCertifications: number;
-  completionRate: number;
-  enrollmentCount: number;
-  pathwayPrograms: number;
-  avgCourseLevel: number;
-  recentActivity: number;
-}
-
-export interface ProgramTrend {
-  value: number;
-  direction: 'up' | 'down' | 'neutral';
-  period?: string; // e.g., "30 days", "quarter"
-}
-
-export interface ProgramAnalytics {
-  metrics: ProgramMetricsData;
-  trends: Record<string, ProgramTrend>;
-  lastUpdated: string;
-  programType: 'all' | 'cte' | 'academic';
-  subjectArea?: string;
-}
