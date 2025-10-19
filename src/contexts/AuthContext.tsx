@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         apiClient.setToken(token);
         localStorage.setItem('token', token);
         toast.success('Login successful!');
-        router.push('/dashboard');
+        router.push('/');
       }
     } catch (error: any) {
       const message = error.response?.data?.error?.message || 'Login failed';
@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         apiClient.setToken(token);
         localStorage.setItem('token', token);
         toast.success('Registration successful!');
-        router.push('/dashboard');
+        router.push('/');
       }
     } catch (error: any) {
       const message = error.response?.data?.error?.message || 'Registration failed';
