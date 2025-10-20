@@ -146,7 +146,7 @@ export default function CTECoursesPage() {
                     <tr key={`${course.course_code}-${index}`} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         <Link 
-                          href={`/sced/${course.course_code}`}
+                          href={`/sced/${course.course_code}?from=certification&cert=${encodeURIComponent(certificationName)}`}
                           className="text-blue-600 hover:text-blue-700 hover:underline"
                         >
                           {course.course_code}
@@ -154,7 +154,7 @@ export default function CTECoursesPage() {
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
                         <Link 
-                          href={`/sced/${course.course_code}`}
+                          href={`/sced/${course.course_code}?from=certification&cert=${encodeURIComponent(certificationName)}`}
                           className="text-gray-900 hover:text-blue-600"
                         >
                           {course.course_code_description}

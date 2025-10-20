@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
   BookOpenIcon,
@@ -32,9 +32,14 @@ interface CourseDetails {
 
 export default function SimpleCourseDetail({ params }: CourseDetailPageProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [course, setCourse] = useState<CourseDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Get breadcrumb info from URL parameters
+  const fromCertification = searchParams.get('from');
+  const certificationName = searchParams.get('cert');
 
   useEffect(() => {
     loadCourseDetails();
@@ -122,9 +127,33 @@ export default function SimpleCourseDetail({ params }: CourseDetailPageProps) {
       {/* Header */}
       <div className="bg-white shadow-sm">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link href="/sced" className="text-blue-600 hover:text-blue-700 text-sm mb-2 inline-block">
-            ← Back to Course List
-          </Link>
+          {fromCertification && certificationName ? (
+            <div className="text-sm mb-2 space-y-1">
+              <Link href="/certifications" className="text-blue-600 hover:text-blue-700">
+                Teacher Certifications
+              </Link>
+              <span className="text-gray-400 mx-2">→</span>
+              <Link 
+                href={`/certifications/cte-courses/${encodeURIComponent(certificationName)}`}
+                className="text-blue-600 hover:text-blue-700"
+              >
+                {certificationName}
+              </Link>
+              <span className="text-gray-400 mx-2">→</span>
+              <span className="text-gray-600">Course Details</span>
+              <br />
+              <Link 
+                href={`/certifications/cte-courses/${encodeURIComponent(certificationName)}`}
+                className="text-blue-600 hover:text-blue-700"
+              >
+                ← Back to {certificationName} Courses
+              </Link>
+            </div>
+          ) : (
+            <Link href="/sced" className="text-blue-600 hover:text-blue-700 text-sm mb-2 inline-block">
+              ← Back to Course List
+            </Link>
+          )}
           <div className="flex items-start justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
